@@ -158,7 +158,7 @@ function save(req, res) {
     title: req.body.title,
     users: [],
     pools: [],
-    createdAt: new Date().toDateString()
+    createdAt: new Date().getTime()
   });
 
   groupModel.save(() => {
@@ -186,7 +186,7 @@ function addPollToGroup(req, res) {
       active: true,
       users: [UserModel],
       question: req.body.question,
-      createdAt: new Date().toDateString()
+      createdAt: new Date().getTime()
     }));
 
     group.save((err, updatedGroup) => {
