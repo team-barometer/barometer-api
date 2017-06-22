@@ -11,19 +11,21 @@ const app = express();
 
 const port = process.env.PORT || 8080;
 
-var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
-  replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
+// var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
+//   replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
+//
+// var mongodbUri = 'mongodb://hackatonas:hackatonas12@ds117209.mlab.com:17209/matcher';
+//
+// mongoose.connect(mongodbUri, options);
+// var conn = mongoose.connection;
 
-var mongodbUri = 'mongodb://hackatonas:hackatonas12@ds117209.mlab.com:17209/matcher';
+mongoose.connect(config.database);
 
-mongoose.connect(mongodbUri, options);
-var conn = mongoose.connection;
-
-conn.once('open', function() {
-  console.log("Mongo connected");
-});
-
-conn.on('error', console.error.bind(console, 'connection error:'));
+// conn.once('open', function() {
+//   console.log("Mongo connected");
+// });
+//
+// conn.on('error', console.error.bind(console, 'connection error:'));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());

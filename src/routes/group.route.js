@@ -7,6 +7,14 @@ router.get('/:title', (req, res) => {
   GroupService.getGroupByName(req, res);
 });
 
+router.get('/user/:email', (req, res) => {
+  GroupService.getGroupByUserEmail(req, res);
+});
+
+router.get('/user/pool/:email', (req, res) => {
+  GroupService.getGroupPollByUserEmail(req, res);
+});
+
 router.post('/save', (req, res) => {
   GroupService.save(req, res);
 });

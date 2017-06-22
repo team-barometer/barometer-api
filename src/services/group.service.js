@@ -1,10 +1,13 @@
 const GroupModel = require('../models/group.model');
 const PoolModel = require('../models/pool.model');
+const UserModel = require('../models/user.model');
 
 const GroupService = {
   save: save,
-  getGroupByName: getGroupByName,
   addPollToGroup: addPollToGroup,
+  getGroupByUserEmail: getGroupByUserEmail,
+  getGroupPollByUserEmail: getGroupPollByUserEmail,
+  getGroupByName: getGroupByName,
   updateUserAnswer: updateUserAnswer
 };
 
@@ -33,6 +36,45 @@ function getGroupByName(req, res) {
   })
 }
 
+function getGroupByUserEmail(req, res) {
+  UserModel.findOne({email: req.params.email}, (err, user) => {
+    GroupModel.findOne({title: user.group}, (err, group) => {
+      if (err) {
+        return res.send({error: true, message: 'Wrong email'})
+      }
+
+      if (!group) {
+        return res.send({error: false, message: 'Nothing found'})
+      }
+
+      let pool = group.pools.find((item) => {
+        return item.active = true;
+      });
+
+      res.send(pool);
+    })
+  });
+}
+
+function getGroupPollByUserEmail(req, res){
+  UserModel.findOne({email: req.params.email}, (err, user) => {
+    GroupModel.findOne({title: user.group}, (err, group) => {
+      if (err) {
+        return res.send({error: true, message: 'Wrong email'})
+      }
+
+      if (!group) {
+        return res.send({error: false, message: 'Nothing found'})
+      }
+
+      const pool = group.pools.find((item) => {
+        return item.active;
+      });
+
+      res.send(pool);
+    })
+  });
+}
 
 function addPollToGroup(req, res) {
   GroupModel.findOne({title: req.body.title}, (err, group) => {
@@ -46,6 +88,7 @@ function addPollToGroup(req, res) {
 
     group.pools.push(new PoolModel({
       title: req.body.poolTitle,
+      active: true,
       users: USERS,
       question: req.body.question,
       createdAt: new Date().toDateString()
@@ -58,6 +101,8 @@ function addPollToGroup(req, res) {
   })
 }
 
+
+// email, id, title
 function updateUserAnswer(req, res) {
   if (!req.body.email) {
     return res.json({success: false, message: 'Please provide user email'});
