@@ -17,5 +17,8 @@
   },
   "devDependencies": {
     "rimraf": "^2.6.1"
+  },
+  "engines": {
+    "node": "7.5.0"
   }
 }
