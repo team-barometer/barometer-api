@@ -3,6 +3,6 @@ const Schema = mongoose.Schema;
 
 module.exports = mongoose.model('User', new Schema({
   email: String,
-  team: String,
-  group: String
+  vote: String,
+  comment: String
 }));

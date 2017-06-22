@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const config = require('./config');
 
-const TestRoute = require('./src/routes/test.route');
 const UserRoute = require('./src/routes/user.route');
 const GroupRoute = require('./src/routes/group.route');
 
@@ -34,7 +33,6 @@ app.route('/').get((req, res) => {
   res.send('Hello Hackaton!');
 });
 
-app.use('/test', TestRoute);
 app.use('/user', UserRoute);
 app.use('/group', GroupRoute);
 

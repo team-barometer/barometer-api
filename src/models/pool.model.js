@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 module.exports = mongoose.model('Pool', new Schema({
   title: String,
+  theme: String,
   users: Array,
   active: Boolean,
   question: String,

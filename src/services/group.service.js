@@ -5,10 +5,12 @@ const UserModel = require('../models/user.model');
 const GroupService = {
   save: save,
   addPollToGroup: addPollToGroup,
+  getPools: getPools,
+  updateUserAnswer: updateUserAnswer,
+
   getGroupByUserEmail: getGroupByUserEmail,
   getGroupPollByUserEmail: getGroupPollByUserEmail,
-  getGroupByName: getGroupByName,
-  updateUserAnswer: updateUserAnswer
+  getGroupByName: getGroupByName
 };
 
 const USERS = [
@@ -21,6 +23,76 @@ const USERS = [
     answer: false
   }
 ];
+
+function getPools(req, res) {
+  GroupModel.findOne({title: 'unknown'}, (err, group) => {
+    if (err) {
+      return res.send({error: true, message: 'Wrong email'})
+    }
+
+    if (!group) {
+      return res.send({error: false, message: 'Nothing found'})
+    }
+
+    res.send(group.pools);
+  })
+}
+
+/**
+ @params
+ {email|id|vote|comment}
+ */
+function updateUserAnswer(req, res) {
+  if (!req.body.email) {
+    return res.json({success: false, message: 'Please provide user email'});
+  }
+
+  if (!req.body.id) {
+    return res.json({success: false, message: 'Please provide poll id'});
+  }
+
+  GroupModel.findOne({title: 'unknown'}, (err, group) => {
+    if (err) {
+      return res.send({error: true, message: 'Wrong email'})
+    }
+
+    if (!group) {
+      return res.send({error: false, message: 'Nothing found'})
+    }
+
+    let pollToUpdateIndex = group.pools.findIndex((item) => {
+      return item._id == req.body.id;
+    });
+
+    let user;
+
+    if (group.pools[pollToUpdateIndex].users) {
+      user = group.pools[pollToUpdateIndex].users.find((user) => {
+        return user.email == req.body.email;
+      });
+    }
+
+    if (user) {
+      return res.send({error: true, message: "Already voted!"});
+    }
+
+    group.pools[pollToUpdateIndex].users.push(new UserModel({
+      email: req.body.email,
+      vote: req.body.vote,
+      comment: req.body.comment ? req.body.comment : ""
+    }));
+
+    group.markModified('pools');
+
+    group.save((err, updatedGroup) => {
+      if (err) {
+        return res.send({error: true, message: "Something wrong happened"});
+      }
+
+      res.send(updatedGroup);
+    });
+  })
+}
 
 function getGroupByName(req, res) {
   GroupModel.find({title: req.params.title}, (err, groups) => {
@@ -56,7 +128,7 @@ function getGroupByUserEmail(req, res) {
   });
 }
 
-function getGroupPollByUserEmail(req, res){
+function getGroupPollByUserEmail(req, res) {
   UserModel.findOne({email: req.params.email}, (err, user) => {
     GroupModel.findOne({title: user.group}, (err, group) => {
       if (err) {
@@ -76,73 +148,6 @@ function getGroupPollByUserEmail(req, res){
   });
 }
 
-function addPollToGroup(req, res) {
-  GroupModel.findOne({title: req.body.title}, (err, group) => {
-    if (err) {
-      return res.send({error: true, message: 'Wrong email'})
-    }
-
-    if (!group) {
-      return res.send({error: false, message: 'Nothing found'})
-    }
-
-    group.pools.push(new PoolModel({
-      title: req.body.poolTitle,
-      active: true,
-      users: USERS,
-      question: req.body.question,
-      createdAt: new Date().toDateString()
-    }));
-
-    group.save((err, updatedGroup) => {
-      res.send(updatedGroup);
-    });
-
-  })
-}
-
-
-// email, id, title
-function updateUserAnswer(req, res) {
-  if (!req.body.email) {
-    return res.json({success: false, message: 'Please provide user email'});
-  }
-
-  if (!req.body.id) {
-    return res.json({success: false, message: 'Please provide poll id'});
-  }
-
-  GroupModel.findOne({title: req.body.title}, (err, group) => {
-    if (err) {
-      return res.send({error: true, message: 'Wrong email'})
-    }
-
-    if (!group) {
-      return res.send({error: false, message: 'Nothing found'})
-    }
-
-    let pollToUpdateIndex = group.pools.findIndex((item) => {
-      return item._id == req.body.id;
-    });
-
-    let poolToUpdate = group.pools.find((item) => {
-      return item._id == req.body.id;
-    });
-
-    poolToUpdate.users.map((user) => {
-      return (user.email == req.body.email) ? user.answer = req.body.choice : user;
-     });
-
-    group.pools[pollToUpdateIndex] = poolToUpdate;
-
-    group.save((err, updatedGroup) => {
-      if (err){
-        return res.send({error: true, message: "Something wrong happened"});
-      }
-      return res.send(updatedGroup);
-    });
-  })
-}
 
 function save(req, res) {
   if (!req.body.title) {
@@ -158,6 +163,36 @@ function save(req, res) {
 
   groupModel.save(() => {
     res.json({success: true, message: 'Group Saved'});
+  })
+}
+
+/**
+ * @params
+ *  {poolTitle|theme}
+ */
+function addPollToGroup(req, res) {
+  GroupModel.findOne({title: 'unknown'}, (err, group) => {
+    if (err) {
+      return res.send({error: true, message: 'Wrong email'})
+    }
+
+    if (!group) {
+      return res.send({error: false, message: 'Nothing found'})
+    }
+
+    group.pools.push(new PoolModel({
+      title: req.body.poolTitle,
+      theme: req.body.theme ? req.body.theme : 'default',
+      active: true,
+      users: [UserModel],
+      question: req.body.question,
+      createdAt: new Date().toDateString()
+    }));
+
+    group.save((err, updatedGroup) => {
+      res.send(updatedGroup);
+    });
+
   })
 }
 
