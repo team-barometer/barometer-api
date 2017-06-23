@@ -168,7 +168,21 @@ function save(req, res) {
 
 /**
  * @params
- *  {poolTitle|theme}
+ *  {poolTitle|theme|options}
+ *
+ *  {
+    value: 0,
+    name: "bad"
+  }, {
+    value: 1,
+    name: "neutral"
+  }, {
+    value: 2,
+    name: "good"
+  }, {
+    value: 3,
+    name: "wow"
+  }
  */
 function addPollToGroup(req, res) {
   GroupModel.findOne({title: 'unknown'}, (err, group) => {
@@ -180,9 +194,14 @@ function addPollToGroup(req, res) {
       return res.send({error: false, message: 'Nothing found'})
     }
 
+    if (!group) {
+      return res.send({error: false, message: 'Nothing found'})
+    }
+
     group.pools.push(new PoolModel({
       title: req.body.poolTitle,
       theme: req.body.theme ? req.body.theme : 'default',
+      options: req.body.options,
       active: true,
       users: [UserModel],
       question: req.body.question,
