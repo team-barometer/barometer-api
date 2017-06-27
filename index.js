@@ -4,24 +4,27 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('./config');
 
+const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
 const UserRoute = require('./src/routes/user.route');
 const GroupRoute = require('./src/routes/group.route');
 
-const app = express();
-
 const port = process.env.PORT || 8080;
 
-var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
-  replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
+const mongoOptions = {
+  server: {socketOptions: {keepAlive: 300000, connectTimeoutMS: 30000}},
+  replset: {socketOptions: {keepAlive: 300000, connectTimeoutMS: 30000}}
+};
 
-var mongodbUri = 'mongodb://hackatonas:hackatonas12@ds117209.mlab.com:17209/matcher';
+const mongodbUri = 'mongodb://hackatonas:hackatonas12@ds117209.mlab.com:17209/matcher';
 
-mongoose.connect(mongodbUri, options);
-var conn = mongoose.connection;
+const conn = mongoose.connection;
 
-// mongoose.connect(config.database);
+mongoose.connect(mongodbUri, mongoOptions);
 
-conn.once('open', function() {
+conn.once('open', () => {
   console.log("Mongo connected");
 });
 
@@ -39,7 +42,28 @@ app.route('/').get((req, res) => {
 app.use('/user', UserRoute);
 app.use('/group', GroupRoute);
 
-app.listen(port, () => {
+
+app.get('/', (req, res) => {
+  res.send('qq');
+});
+
+let connections = [];
+
+io.on('connection', (socket) => {
+  connections.push(socket);
+  socket.emit('news', {hello: 'world'});
+  console.log('someone connected with id: ' + socket.id);
+  socket.on('my other event', (data) => {
+    console.log(data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('someone disconnected');
+    io.emit('user disconnected');
+  });
+});
+
+server.listen(port, () => {
   console.info("\x1b[36m", 'App is running on ' + port)
 });
 

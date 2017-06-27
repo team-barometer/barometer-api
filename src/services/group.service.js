@@ -194,10 +194,6 @@ function addPollToGroup(req, res) {
       return res.send({error: false, message: 'Nothing found'})
     }
 
-    if (!group) {
-      return res.send({error: false, message: 'Nothing found'})
-    }
-
     group.pools.push(new PoolModel({
       title: req.body.poolTitle,
       theme: req.body.theme ? req.body.theme : 'default',
