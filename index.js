@@ -18,11 +18,9 @@ const mongoOptions = {
   replset: {socketOptions: {keepAlive: 300000, connectTimeoutMS: 30000}}
 };
 
-const mongodbUri = 'mongodb://hackatonas:hackatonas12@ds117209.mlab.com:17209/matcher';
-
 const conn = mongoose.connection;
 
-mongoose.connect(mongodbUri, mongoOptions);
+mongoose.connect(config.database, mongoOptions);
 
 conn.once('open', () => {
   console.log("Mongo connected");
@@ -47,10 +45,7 @@ app.get('/', (req, res) => {
   res.send('qq');
 });
 
-let connections = [];
-
 io.on('connection', (socket) => {
-  connections.push(socket);
   socket.emit('news', {hello: 'world'});
   console.log('someone connected with id: ' + socket.id);
   socket.on('my other event', (data) => {
