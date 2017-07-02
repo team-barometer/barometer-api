@@ -1,5 +1,6 @@
 const QuestionModel = require('../models/question.model');
 const AnswerModel = require('../models/answer.model');
+const RequestHelper = require('../helpers/request.helper');
 
 const voteRequiredFields = [
   {field: 'userEmail', message: 'Please provide voter email'},
@@ -13,7 +14,7 @@ const QuestionService = {
 
 function vote(req, res) {
 
-  let errors = _validateRequiredFields(req, voteRequiredFields);
+  let errors = RequestHelper.validateRequiredFields(req, voteRequiredFields);
 
   if (errors.length){
     return res.json(errors);
@@ -53,18 +54,6 @@ function vote(req, res) {
         });
       }
     });
-}
-
-function _validateRequiredFields(req, fieldsToValidate) {
-  let errors = [];
-
-  fieldsToValidate.forEach((error) => {
-    if (!req.body[error.field]) {
-      errors.push({error: true, field: error.field, message: error.message});
-    }
-  });
-
-  return errors;
 }
 
 function _alreadyVoted(question, req) {

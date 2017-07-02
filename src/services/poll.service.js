@@ -1,5 +1,16 @@
 const PollModel = require('../models/poll.model');
 const QuestionModel = require('../models/question.model');
+const RequestHelper = require('../helpers/request.helper');
+
+const createPollRequiredFields = [
+  {field: 'creatorEmail', message: 'Please provide your email'},
+  {field: 'pollTitle', message: 'Please provide poll title'}
+];
+
+const addQuestionToPollRequiredFields = [
+  {field: 'pollId', message: 'Please provide poll ID'},
+  {field: 'questionTitle', message: 'Please provide question name'}
+];
 
 const PollService = {
   create: createPoll,
@@ -7,23 +18,18 @@ const PollService = {
 };
 
 function createPoll(req, res) {
-  if (!req.body.creatorEmail) {
-    return res.json({error: true, field: 'creatorEmail', message: 'Please provide your email'});
-  }
 
-  if (!req.body.pollTitle) {
-    return res.json({error: true, field: 'pollTitle',  message: 'Please provide poll title'});
-  }
+  let errors = RequestHelper.validateRequiredFields(req, createPollRequiredFields);
 
-  if (!req.body.theme) {
-    return res.json({error: true, field: 'theme', message: 'Please provide poll theme'});
+  if (errors.length){
+    return res.json(errors);
   }
 
   let pollModel = new PollModel({
     title: req.body.pollTitle,
     questions: [],
     users: [],
-    theme: req.body.theme,
+    theme: req.body.theme ? req.body.theme : 'default',
     options: [],
     isAnonymous: false,
     isActive: false,
@@ -40,16 +46,14 @@ function createPoll(req, res) {
 }
 
 function addQuestionToPoll(req, res) {
-  if (!req.body.pollId) {
-    return res.json({error: true, field: 'pollId', message: 'Please provide poll ID'});
-  }
+  let errors = RequestHelper.validateRequiredFields(req, addQuestionToPollRequiredFields);
 
-  if (!req.body.questionTtile) {
-    return res.json({error: true, field: 'questionTtile', message: 'Please provide question name'});
+  if (errors.length){
+    return res.json(errors);
   }
 
   let questionModel = new QuestionModel({
-    title: req.body.questionTtile,
+    title: req.body.questionTitle,
     answers: []
   });
 
