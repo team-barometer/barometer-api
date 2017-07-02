@@ -1,21 +1,22 @@
 const QuestionModel = require('../models/question.model');
 const AnswerModel = require('../models/answer.model');
 
-const PollService = {
+const voteRequiredFields = [
+  {field: 'userEmail', message: 'Please provide voter email'},
+  {field: 'questionId', message: 'Please provide question ID'},
+  {field: 'answer', message: 'Please provide your answer'}
+];
+
+const QuestionService = {
   vote: vote
 };
 
 function vote(req, res) {
-  if (!req.body.userEmail) {
-    return res.json({error: true, field: 'userEmail', message: 'Please provide voter email'});
-  }
 
-  if (!req.body.questionId) {
-    return res.json({error: true, field: 'questionId', message: 'Please provide question ID'});
-  }
+  let errors = _validateRequiredFields(req, voteRequiredFields);
 
-  if (!req.body.answer) {
-    return res.json({error: true, field: 'answer', message: 'Please provide your answer'});
+  if (errors.length){
+    return res.json(errors);
   }
 
   QuestionModel
@@ -26,18 +27,14 @@ function vote(req, res) {
         return res.json({error: true, message: 'There is no such question with given ID'});
       }
 
-      let alreadyVoted = question.answers.find((answer) => {
-        return answer.user === req.body.userEmail;
-      });
-
-      if (alreadyVoted) {
+      if (_alreadyVoted(question, req)) {
         return res.json({error: true, message: 'Already voted'});
       } else {
-
         let answerModel = new AnswerModel({
           answer: req.body.answer,
           user: req.body.userEmail,
-          timestamp: new Date().getTime()
+          timestamp: new Date().getTime(),
+          comment: req.body.comment
         });
 
         answerModel.save((err, answer) => {
@@ -47,7 +44,7 @@ function vote(req, res) {
 
           question.answers.push(answer._id);
 
-          question.save((err, question) => {
+          question.save((err) => {
             if (err) {
               return res.json({error: true, message: 'Question cannot be updated for mysterious reasons'});
             }
@@ -58,4 +55,22 @@ function vote(req, res) {
     });
 }
 
-module.exports = PollService;
+function _validateRequiredFields(req, fieldsToValidate) {
+  let errors = [];
+
+  fieldsToValidate.forEach((error) => {
+    if (!req.body[error.field]) {
+      errors.push({error: true, field: error.field, message: error.message});
+    }
+  });
+
+  return errors;
+}
+
+function _alreadyVoted(question, req) {
+  return question.answers.find((answer) => {
+    return answer.user === req.body.userEmail;
+  });
+}
+
+module.exports = QuestionService;
