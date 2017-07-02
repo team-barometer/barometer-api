@@ -3,10 +3,11 @@ const Schema = mongoose.Schema;
 
 module.exports = mongoose.model('Pool', new Schema({
   title: String,
-  theme: String,
+  questions: Array,
   users: Array,
+  theme: String,
   options: Array,
-  active: Boolean,
-  question: String,
+  isAnonymous: Boolean,
+  isActive: Boolean,
   createdAt: String
 }));

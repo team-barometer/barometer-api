@@ -1,5 +1,5 @@
 const GroupModel = require('../models/group.model');
-const PoolModel = require('../models/pool.model');
+const PoolModel = require('../models/poll.model');
 const UserModel = require('../models/user.model');
 
 const GroupService = {

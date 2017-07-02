@@ -22,10 +22,7 @@ const conn = mongoose.connection;
 
 mongoose.connect(config.database, mongoOptions);
 
-conn.once('open', () => {
-  console.log("Mongo connected");
-});
-
+conn.once('open', console.log.bind(console, "Mongo connected"));
 conn.on('error', console.error.bind(console, 'connection error:'));
 
 app.use(cors());
