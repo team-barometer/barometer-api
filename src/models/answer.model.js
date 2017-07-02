@@ -3,6 +3,6 @@ const Schema = mongoose.Schema;
 
 module.exports = mongoose.model('Answer', new Schema({
   answer: String,
-  user: Array,
+  user: String,
   timestamp: String
 }));

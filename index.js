@@ -11,6 +11,7 @@ const io = require('socket.io')(server);
 const UserRoute = require('./src/routes/user.route');
 const GroupRoute = require('./src/routes/group.route');
 const PollRoute = require('./src/routes/poll.route');
+const QuestionService = require('./src/routes/question.route');
 
 const port = process.env.PORT || 8080;
 
@@ -38,7 +39,7 @@ app.route('/').get((req, res) => {
 app.use('/user', UserRoute);
 app.use('/group', GroupRoute);
 app.use('/poll', PollRoute);
-
+app.use('/question', QuestionService);
 
 app.get('/', (req, res) => {
   res.send('qq');

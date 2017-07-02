@@ -3,5 +3,5 @@ const Schema = mongoose.Schema;
 
 module.exports = mongoose.model('Question', new Schema({
   title: String,
-  answers: Array
+  answers: [{type: Schema.Types.ObjectId, ref: 'Answer'}],
 }));
